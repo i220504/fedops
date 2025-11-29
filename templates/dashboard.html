@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block content %}
+<h2 class="mb-4">Federated Learning Metrics</h2>
+
+<div class="row">
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">Training Loss</div>
+            <div class="card-body">
+                <canvas id="lossChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">Evaluation Accuracy</div>
+            <div class="card-body">
+                <canvas id="accChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">Client Participation</div>
+            <div class="card-body">
+                <canvas id="clientChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

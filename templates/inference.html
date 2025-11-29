@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set active_page = "inference" %}
+
+{% block content %}
+
+<h2 class="mb-4 fw-bold">🎙️ Inference Playground</h2>
+
+<div class="row g-4">
+
+    <!-- ===========================
+         LEFT SIDE — RECORDING PANEL
+    ============================ -->
+    <div class="col-md-4">
+        <div class="card shadow-sm p-4 text-center">
+            <h5 class="fw-semibold mb-3">Record Audio</h5>
+
+            <button id="recordBtn" class="btn btn-danger btn-lg w-100 mb-3">
+                <i class="fa fa-microphone"></i> Start Recording
+            </button>
+
+            <button id="stopBtn" class="btn btn-secondary w-100 mb-3" disabled>
+                <i class="fa fa-stop"></i> Stop Recording
+            </button>
+
+            <audio id="audioPlayer" controls class="mt-2 w-100"></audio>
+        </div>
+    </div>
+
+    <!-- ===========================
+         RIGHT SIDE — PREDICTION + VISUALS
+    ============================ -->
+    <div class="col-md-8">
+        <div class="card shadow-sm p-4">
+
+            <h5 class="fw-semibold">Prediction Output</h5>
+
+            <div id="predictionResult"
+                 class="fs-3 fw-bold text-primary my-3">
+            </div>
+
+            <!-- ===========================
+                 Progress Box
+            ============================ -->
+            <div id="progress-box" class="d-none mt-3">
+                <label class="fw-semibold">Inference Progress</label>
+                <div class="progress" style="height: 22px;">
+                    <div id="progress-bar"
+                         class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                         style="width: 0%;">
+                        0%
+                    </div>
+                </div>
+                <div id="progress-text"
+                     class="mt-2 text-muted small">
+                    Starting...
+                </div>
+            </div>
+
+            <!-- ===========================
+                 Waveform
+            ============================ -->
+            <h6 class="mt-4 fw-semibold">Waveform</h6>
+            <div class="border rounded p-2 bg-light">
+                <img id="waveformImg"
+                     class="img-fluid rounded"
+                     alt="Waveform will appear here">
+            </div>
+
+            <!-- ===========================
+                 Spectrogram
+            ============================ -->
+            <h6 class="mt-4 fw-semibold">Spectrogram</h6>
+            <div class="border rounded p-2 bg-light">
+                <img id="spectrogramImg"
+                     class="img-fluid rounded"
+                     alt="Spectrogram will appear here">
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/inference.js') }}"></script>
+{% endblock %}

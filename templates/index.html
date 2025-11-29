@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FL Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+</head>
+
+<body class="bg-dark text-light">
+
+<div class="container py-4">
+
+    <h1 class="mb-4 text-center">Federated Learning Dashboard</h1>
+
+    <!-- Train Loss -->
+    <h3>Train Loss</h3>
+    <canvas id="trainChart"></canvas>
+    <hr class="text-secondary">
+
+    <!-- Eval Loss -->
+    <h3>Eval Loss</h3>
+    <canvas id="evalLossChart"></canvas>
+    <hr class="text-secondary">
+
+    <!-- Eval Accuracy -->
+    <h3>Eval Accuracy</h3>
+    <canvas id="evalAccChart"></canvas>
+    <hr class="text-secondary">
+
+    <!-- Events -->
+    <h3>Round Events</h3>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr><th>Round</th><th>Event</th><th>Details</th></tr>
+        </thead>
+        <tbody id="eventsTable"></tbody>
+    </table>
+
+</div>
+
+<script>
+async function fetchJSON(url) {
+    const res = await fetch(url);
+    return res.json();
+}
+
+async function loadDashboard() {
+    const train = await fetchJSON("/api/train");
+    const evald = await fetchJSON("/api/eval");
+    const events = await fetchJSON("/api/events");
+
+    // TRAIN LOSS
+    new Chart(document.getElementById("trainChart"), {
+        type: "line",
+        data: {
+            labels: train.map(d => d.round),
+            datasets: [{
+                label: "Train Loss",
+                data: train.map(d => d.train_loss),
+                borderColor: "cyan"
+            }]
+        }
+    });
+
+    // EVAL LOSS
+    new Chart(document.getElementById("evalLossChart"), {
+        type: "line",
+        data: {
+            labels: evald.map(d => d.round),
+            datasets: [{
+                label: "Eval Loss",
+                data: evald.map(d => d.eval_loss),
+                borderColor: "orange"
+            }]
+        }
+    });
+
+    // EVAL ACC
+    new Chart(document.getElementById("evalAccChart"), {
+        type: "line",
+        data: {
+            labels: evald.map(d => d.round),
+            datasets: [{
+                label: "Eval Accuracy",
+                data: evald.map(d => d.eval_acc),
+                borderColor: "lightgreen"
+            }]
+        }
+    });
+
+    // EVENTS TABLE
+    const tbody = document.getElementById("eventsTable");
+    events.forEach(e => {
+        let row = `
+            <tr>
+                <td>${e.round}</td>
+                <td>${e.event}</td>
+                <td>${JSON.stringify(e)}</td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>

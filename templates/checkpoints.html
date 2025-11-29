@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% set active_page = "checkpoints" %}
+
+{% block content %}
+<h2 class="mb-4">Model Checkpoints</h2>
+
+<ul class="list-group" id="ckptList"></ul>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch("/api/checkpoints").then(r=>r.json()).then(data=>{
+    const ul = document.getElementById("ckptList");
+    data.forEach(f=>{
+        ul.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between">
+                <span>${f}</span>
+                <a class="btn btn-sm btn-dark" href="/download/${f}">Download</a>
+            </li>`;
+    });
+});
+</script>
+{% endblock %}

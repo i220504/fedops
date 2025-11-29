@@ -1,0 +1,47 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+.git
+.gitignore
+.DS_Store
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.env
+.env.local
+*.log
+.venv/
+# Logs and runtime files
+logs/
+# Model checkpoints and large binaries
+*.pt
+best_model.pt
+model_round_*.pt
+
+
+# Raw / large datasets
+data/
+
+# Docker / editor artifacts
+*.swp
+*.swo
+*~
+.ipynb_checkpoints/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.ipynb_checkpoints/

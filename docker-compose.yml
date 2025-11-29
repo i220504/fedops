@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+
+  flwr-sim:
+    build: .
+    container_name: flwr_sim
+    command: flwr run
+    volumes:
+      - .:/app
+      - ./logs:/app/logs       # logs visible outside container
+    ports:
+      - "8000:8000"            # Prometheus will scrape this
+    tty: true
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fl_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - flwr-sim
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fl_grafana
+    ports:
+      - "3030:3000"
+
+    volumes:
+      - ./grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.12.2
+    container_name: mlflow_server
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlflow/mlruns
+      --host 0.0.0.0
