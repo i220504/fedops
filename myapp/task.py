@@ -13,6 +13,7 @@ LOCAL_DATA_PATH = "/Users/osman/Documents/MLOPS PROJ AUDIO FRI MERGE/myapp/myapp
 DOCKER_DATA_PATH = "/app/myapp/mfcc_dataset_v2.pt"
 DATA_ROOT = "/Users/osman/Documents/MLOPS PROJ AUDIO FRI MERGE/app/data/fed_iid_3clients"
 DATA_ROOT_DOCKER = "/app/data/fed_iid_3clients"
+
 # Use local if exists, otherwise use docker path
 if os.path.exists(LOCAL_DATA_PATH):
     DATA_PATH = LOCAL_DATA_PATH
@@ -23,19 +24,27 @@ if os.path.exists(DATA_ROOT):
     DATA_ROOT = DATA_ROOT
 else:
     DATA_ROOT = DATA_ROOT_DOCKER
-  # or v3 if normalized version used
-print(f"[MFCC] Loading {DATA_PATH} ...")
-data = torch.load(DATA_PATH)
 
-X = data["X"]             # shape: (N, 1, 40, 101)
-y = data["y"]             # shape: (N)
-classes = data["classes"]
-Tmax = data["Tmax"]
+# Only load data if file exists (skip in CI/testing without dataset)
+X = None
+y = None
+classes = None
+Tmax = None
+NUM_CLASSES = 35  # Default for SpeechCommands
+N_SAMPLES = 0
 
-NUM_CLASSES = len(classes)
-N_SAMPLES = len(X)
-
-print(f"[MFCC] Loaded MFCC dataset: {X.shape}, Labels: {N_SAMPLES}")
+if os.path.exists(DATA_PATH):
+    print(f"[MFCC] Loading {DATA_PATH} ...")
+    data = torch.load(DATA_PATH)
+    X = data["X"]             # shape: (N, 1, 40, 101)
+    y = data["y"]             # shape: (N)
+    classes = data["classes"]
+    Tmax = data["Tmax"]
+    NUM_CLASSES = len(classes)
+    N_SAMPLES = len(X)
+    print(f"[MFCC] Loaded MFCC dataset: {X.shape}, Labels: {N_SAMPLES}")
+else:
+    print(f"[MFCC] Dataset not found at {DATA_PATH}, skipping data load (OK for testing)")
 
 
 # ============================================================
