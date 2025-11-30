@@ -1,0 +1,118 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR title format
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if ! echo "$PR_TITLE" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?: .+'; then
+            echo "::error::PR title must follow conventional commits format"
+            echo "Examples: feat: add new feature, fix(auth): resolve login issue"
+            exit 1
+          fi
+
+      - name: Check for conflicts
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          if git merge-tree $(git merge-base HEAD origin/${{ github.base_ref }}) origin/${{ github.base_ref }} HEAD | grep -q '<<<<<<<'; then
+            echo "::error::PR has merge conflicts"
+            exit 1
+          fi
+
+  code-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install black flake8 pylint
+          pip install -e .
+
+      - name: Check code formatting
+        run: |
+          black --check myapp/ app.py || echo "::warning::Code formatting issues found. Run 'black myapp/ app.py' to fix."
+
+      - name: Lint with flake8
+        run: |
+          flake8 myapp/ app.py --max-line-length=100 --ignore=E203,W503,E501 || echo "::warning::Linting issues found"
+
+  size-check:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          LINES_CHANGED=$(git diff --shortstat origin/${{ github.base_ref }}...HEAD | sed -E 's/.* ([0-9]+) insertion.*([0-9]+) deletion.*/\1 + \2/')
+          TOTAL_CHANGES=$(echo "$LINES_CHANGED" | bc)
+          
+          if [ "$TOTAL_CHANGES" -gt 500 ]; then
+            echo "::warning::PR has $TOTAL_CHANGES lines changed. Consider breaking it into smaller PRs."
+          fi
+          
+          echo "Total lines changed: $TOTAL_CHANGES"
+
+  test-coverage:
+    name: Test Coverage Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov
+          pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -e .
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ --cov=myapp --cov-report=term --cov-report=xml
+        continue-on-error: true
+
+      - name: Comment coverage on PR
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: always()
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+        continue-on-error: true

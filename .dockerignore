@@ -23,13 +23,14 @@ dmypy.json
 .env.local
 *.log
 .venv/
+
 # Logs and runtime files
 logs/
+
 # Model checkpoints and large binaries
 *.pt
 best_model.pt
 model_round_*.pt
-
 
 # Raw / large datasets
 data/
@@ -41,7 +42,23 @@ data/
 .ipynb_checkpoints/
 .idea/
 .vscode/
-*.swp
-*.swo
-*~
-.ipynb_checkpoints/
+
+# CI/CD artifacts
+.github/
+.flwr/
+mlruns/
+grafana/
+prometheus.yml
+
+# Test artifacts
+tests/
+htmlcov/
+.coverage
+*.cover
+.pytest_cache/
+coverage.xml
+
+# Documentation
+README.md
+docs/
+*.md
