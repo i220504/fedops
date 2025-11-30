@@ -21,12 +21,7 @@ RUN pip install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cpu
 
 # Quick sanity check: imports + version print
-RUN python - << 'EOF'
-import torch, torchvision, torchaudio
-print("Torch:", torch.__version__)
-print("Torchvision:", torchvision.__version__)
-print("Torchaudio:", torchaudio.__version__)
-EOF
+RUN python3 -c "import torch, torchvision, torchaudio; print('Torch:', torch.__version__); print('Torchvision:', torchvision.__version__); print('Torchaudio:', torchaudio.__version__)"
 
 # CI image sirf yeh message print karega
 CMD ["echo", "CI image build successful"]
